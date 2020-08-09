@@ -1,12 +1,9 @@
 ﻿using Microsoft.Identity.Client;
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Configuration;
-using System.Threading.Tasks;
-using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Threading.Tasks;
 
 namespace AzureADConsole
 {
@@ -30,8 +27,7 @@ namespace AzureADConsole
                 clientId = Console.ReadLine();
             }
 
-            Console.WriteLine("Please enter the username");
-            var userName = Console.ReadLine();
+
             string[] scopes = { "User.Read" };
             var graphUrl = "https://graph.microsoft.com/v1.0/me";
 
@@ -40,12 +36,17 @@ namespace AzureADConsole
             AuthenticationResult result = null;
             try
             {
+                Console.WriteLine($"Attempting to authenticate using device code");
                 var resultTask = AcquireTokenDeviceCode(scopes);
                 resultTask.Wait();
                 result = resultTask.Result;
             }
             catch (MsalUiRequiredException)
             {
+                Console.WriteLine($"Attempting to authenticate using interactive mode");
+                Console.WriteLine("Please enter the username");
+                var userName = Console.ReadLine();
+
                 var resultTask = AcquireTokenInteractive(scopes, userName);
                 resultTask.Wait();
                 result = resultTask.Result;
@@ -103,6 +104,8 @@ namespace AzureADConsole
         {
             try
             {
+
+
                 return await app.AcquireTokenInteractive(scopes)
                                 .WithLoginHint(userName)
                                 .WithPrompt(Prompt.SelectAccount)
